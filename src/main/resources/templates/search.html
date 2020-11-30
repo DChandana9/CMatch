@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc">
+<head>
+<title>C-Match</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
+	<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<style>
+
+
+.navbar-nav.navbar-center {
+	position: absolute;
+	left: 50%;
+	transform: translatex(-50%);
+}
+.cmatch-team1 {
+    font-weight: bold;
+}
+.cmatch-team2 {
+    font-weight: bold;
+
+}
+.cmatch-date {
+
+    color:blue;
+}
+.cmatch-winner_team {
+font-weight: bold;
+    color : yellow;
+
+}
+</style>
+</head>
+<body onload="checkUser();searchMatches();">
+
+
+	<nav class="navbar navbar-dark bg-primary navbar-expand-sm fixed-top">
+		<a class="navbar-brand" href="./"> <img src="./img/cricketpic.png"
+			width="30" height="30" alt="logo"> C-Match
+		</a>
+	<form class="form-inline mt-2 mt-md-0" method="get" action="./search">
+          <input class="form-control mr-md-2" type="text" placeholder="Name or Type"  id="search" name="search" aria-label="Search" required>
+          <button id="search-btn" class="btn btn-warning my-2 my-sm-0" type="submit">Search</button>
+        </form>
+		<button class="navbar-toggler" type="button"
+			data-toggle="collapse" data-target="#navbar-list-4"
+			aria-controls="navbarNav" aria-expanded="false"
+			aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbar-list-4">
+			<ul class="navbar-nav ml-auto">
+				<li class="nav-item dropdown"><a
+					class="nav-link dropdown-toggle" href="#"
+					id="navbarDropdownMenuLink" role="button" data-toggle="dropdown"
+					aria-haspopup="true" aria-expanded="false"> <img id="icon"
+						src="./img/Ball.png" width="40" height="40" class="rounded-circle">
+				</a>
+					<div class="dropdown-menu" id="profile_options"
+						aria-labelledby="navbarDropdownMenuLink"></div></li>
+			</ul>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		</div>
+	</nav>
+
+	<br>
+	<br>
+<center>
+		<h2>
+			<font color=white><b>Search Match Results</b></font>
+		</h2>
+	</center>
+	<div class="container-fluid">
+		<div class="row" style="margin-top: 0px" id="search_matches"></div>
+	</div>
+
+	
+</body>
+
+
+
+
+
+
+
+<script>
+function checkUser() {
+	$
+			.ajax({
+				type : "GET",
+				url : "./getUser",
+				success : function(response) {
+
+					if (response.hasOwnProperty("Email")) {
+
+						$("#profile_options")
+								.html('<a class="dropdown-item" href="./MyMatches">My Matches</a><a class="dropdown-item" href="./MyProfile">Edit Profile</a><a class="dropdown-item" href="./logout">Sign Out</a>');					
+						$("#icon").attr("src","./img/"+response["img"]);
+					} else {
+						$("#profile_options")
+						.html(' <a class="dropdown-item" href="./SignUp">SignUp</a><a class="dropdown-item" href="./login">Login</a>');
+				}},
+				error : function(data) {
+					$("#profile_options")
+					.html(' <a class="dropdown-item" href="./SignUp">SignUp</a><a class="dropdown-item" href="./login">Login</a>');
+	
+				}
+			});
+
+}
+function searchMatches() {
+	$("#search_matches").html("<center><font color=blue><h5> Please Wait......<h5></font></center>")
+	var q=checkURIParam("search").toUpperCase();
+	$
+			.ajax({
+				type : "GET",
+				url : "https://cricapi.com/api/matches?apikey=OdL7x4SvkUYZrsqVaWbck8fI75k1",
+				success : function(response) {
+
+					if (response.hasOwnProperty("matches")) {
+						var matches=response["matches"];
+						var k=0;
+						var searchHTML="";
+						for(i=0;i<matches.length;i++){
+								var matchID=matches[i]['unique_id'];
+								var temp=matches[i]["date"].split("T");
+								var date=temp[0];
+								var team1=matches[i]['team-1'].toUpperCase();
+								var team2=matches[i]['team-2'].toUpperCase();
+								var matchType=matches[i]['type'].toUpperCase();
+								var winner=(matches[i]['winner_team']!=null)?("Won By : <br>"+matches[i]['winner_team'].toUpperCase()):"";
+								if(team1.includes(q) || team2.includes(q) || (matchType!=null &&matchType.includes(q))){
+								
+								
+searchHTML+='<div class="col-sm-2 mt-3 d-flex align-items-stretch"><div class="card bg-secondary text-white shadow-xl rounded" style="box-shadow: 0 0 9px 0px black;width:100%"><div class="card-body" style="padding-bottom: 0px !important;background-color:#FF4081"><center><div class="cmatch-team1">'+team1+'</div>VS<div class="cmatch-team2">'+team2+'</div><br><div class="cmatch-date">'+date+'</div><br><div class="cmatch-winner_team">'+winner+'</div><br><div>'+matchType+'</div><br><div class="pretty p-switch p-fill "><input type="checkbox" onchange="modifyRecom('+matchID+','+k+')" id="recom_'+k+'" /><div class="state p-on p-primary"><label ><span id="lab_'+k+'">Recommend</span></label></div></div><center></div></div></div>';
+								
+								k++;
+			
+							}
+							
+						}
+						if(k==0){
+							$("#search_matches").html("<center> <font color=red><b>No Records Matched</b></font> </center>");
+						}else{
+							$("#search_matches").html(searchHTML);
+						}
+					}
+						
+					 else {
+						
+							}},
+				error : function(data) {
+					}
+			});
+
+}
+
+function modifyRecom(id,btn){
+	var req="";
+	var URL="";
+	if($("#recom_"+btn).is(":checked")){
+		req="PUT";
+		URL="./AddToMyMatches/"+id;
+		$("#lab_"+btn).html("UnRecommend");
+	}else{
+		req="DELETE";
+		URL="./deleteMatch/"+id;
+		$("#lab_"+btn).html("Recommend");
+	}
+	
+	
+	$
+	.ajax({
+		type : req,
+		url : URL,
+		success : function(response) {
+
+			if (!response.hasOwnProperty("Error")) {
+				
+					
+				
+			}
+				
+			 else {
+				 alert("Please login to save Matches");
+				
+					}},
+		error : function(data) {
+			alert("Please Try Again");
+			}
+	});
+}
+function checkURIParam(name) {
+	var results = new RegExp('[\?&]' + name + '=([^&#]*)')
+			.exec(window.location.href);
+	return results[1] || 0;
+}
+</script>
+</html>

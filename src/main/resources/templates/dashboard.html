@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc">
+<head>
+<title>C-Match</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
+	<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	</head>
+<style>
+.navbar-nav.navbar-center {
+	position: absolute;
+	left: 50%;
+	transform: translatex(-50%);
+}
+.cmatch-team1 {
+    font-weight: bold;
+}
+.cmatch-team2 {
+    font-weight: bold;
+
+}
+
+.cmatch-date {
+
+    color:blue;
+}
+.cmatch-winner_team {
+font-weight: bold;
+    color : yellow;
+
+}
+@media (max-width: 768px) {
+    .carousel-inner .carousel-item > div {
+        display: none;
+    }
+    .carousel-inner .carousel-item > div:first-child {
+        display: block;
+    }
+}
+
+.carousel-inner .carousel-item.active,
+.carousel-inner .carousel-item-next,
+.carousel-inner .carousel-item-prev {
+    display: flex;
+}
+
+/* display 3 */
+@media (min-width: 768px) {
+    
+    .carousel-inner .carousel-item-right.active,
+    .carousel-inner .carousel-item-next {
+      transform: translateX(33.333%);
+    }
+    
+    .carousel-inner .carousel-item-left.active, 
+    .carousel-inner .carousel-item-prev {
+      transform: translateX(-33.333%);
+    }
+}
+
+.carousel-inner .carousel-item-right,
+.carousel-inner .carousel-item-left{ 
+  transform: translateX(0);
+}
+
+
+</style>
+</head>
+<body onload="checkUser();getLiveMatches();getRecommendations();">
+
+
+	<nav class="navbar navbar-dark bg-primary navbar-expand-sm fixed-top">
+		<a class="navbar-brand" href="./"> <img src="./img/cricketpic.png"
+			width="50" height="50" alt="logo"><b> C-Match</b>
+		</a>
+	<form class="form-inline mt-2 mt-md-0" method="get" action="./search">
+          <input class="form-control mr-md-2" type="text" placeholder="Name or Type"  id="search" name="search" aria-label="Search" required>
+          <button id="search-btn" class="btn btn-warning my-2 my-sm-0" type="submit">Search</button>
+        </form>
+		<button class="navbar-toggler" type="button"
+			data-toggle="collapse" data-target="#navbar-list-4"
+			aria-controls="navbarNav" aria-expanded="false"
+			aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbar-list-4">
+			<ul class="navbar-nav ml-auto">
+				<li class="nav-item dropdown"><a
+					class="nav-link dropdown-toggle" href="#"
+					id="navbarDropdownMenuLink" role="button" data-toggle="dropdown"
+					aria-haspopup="true" aria-expanded="false"> <img id="icon"
+						src="./img/Ball.png" width="50" height="50" class="rounded-circle">
+				</a>
+					<div class="dropdown-menu" id="profile_options"
+						aria-labelledby="navbarDropdownMenuLink"></div></li>
+			</ul>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		</div>
+	</nav>
+<br>
+	<br>
+<br>
+	<br>
+
+<center>
+		<h2>
+			<font color=BLACK><b>Your Recommendations</b></font>
+		</h2>
+	</center>
+	<div class="container-fluid">
+		<div class="row" style="margin-top: 0px" id="recom_matches"></div>
+	</div>
+    
+
+
+
+<hr style="height:2px;border-width:0;color:gray;background-color:gray">
+	<br>
+	<br>
+<center>
+		<h2>
+			<font color=BLACK><b>Up Coming Matches</b></font>
+		</h2>
+	</center>
+	<div class="container-fluid">
+		<div class="row" style="margin-top: 0px" id="up_matches" ></div>
+	</div>
+
+    <br>
+	<br>
+	<hr style="height:2px;border-width:0;color:gray;background-color:gray">
+<center>
+		<h2>
+			<font color=BLACK><b>Old Matches</b></font>
+		</h2>
+	</center>
+	<div class="container-fluid">
+		<div class="row" style="margin-top: 0px" id="old_matches"></div>
+	</div>
+    
+</div>
+
+
+	
+</body>
+
+
+
+
+
+
+
+<script>
+function checkUser() {
+	$
+			.ajax({
+				type : "GET",
+				url : "./getUser",
+				success : function(response) {
+
+					if (response.hasOwnProperty("Email")) {
+
+						$("#profile_options")
+								.html('<a class="dropdown-item" href="./MyMatches">My Matches</a><a class="dropdown-item" href="./MyProfile">Edit Profile</a><a class="dropdown-item" href="./logout">Sign Out</a>');					
+						$("#icon").attr("src","./img/"+response["img"]);
+						
+					} else {
+						$("#profile_options")
+						.html(' <a class="dropdown-item" href="./SignUp">SignUp</a><a class="dropdown-item" href="./login">Login</a>');
+						window.location.href="./";
+					}},
+				error : function(data) {
+					$("#profile_options")
+					.html(' <a class="dropdown-item" href="./SignUp">SignUp</a><a class="dropdown-item" href="./login">Login</a>');
+					window.location.href="./";
+				}
+			});
+
+}
+
+
+function getLiveMatches() {
+	$
+			.ajax({
+				type : "GET",
+				url : "https://cricapi.com/api/matches?apikey=OdL7x4SvkUYZrsqVaWbck8fI75k1",
+				success : function(response) {
+
+					if (response.hasOwnProperty("matches")) {
+						var matches=response["matches"];
+						var k=0;
+						var upHTML="";
+						var oldHTML="";
+						var oldActive="active";
+						var upActive="active";
+						for(i=0;i<matches.length;i++){
+							var matchID=matches[i]['unique_id'];
+							var temp=matches[i]["date"].split("T");
+							var date=temp[0];
+							var team1=matches[i]['team-1'].toUpperCase();
+							var team2=matches[i]['team-2'].toUpperCase();
+							var matchType=matches[i]['type'].toUpperCase();
+							var winner=(matches[i]['winner_team']!=null)?("Won By : <br>"+matches[i]['winner_team'].toUpperCase()):"";
+							
+							if(matches[i].matchStarted==false && k<6){
+								
+								//upHTML+='<div class="col-sm-2 mt-3 d-flex align-items-stretch"><div class="card bg-secondary text-white shadow-xl rounded" style="box-shadow: 0 0 9px 0px black;width:100%"><div class="card-body bg-gray" style="padding-bottom: 0px !important"><center><div class="cmatch-team1">'+team1+'</div>VS<div class="cmatch-team2">'+team2+'</div><br><div class="cmatch-date">'+date+'</div><center></div></div></div></div>'
+								upHTML+='<div class="col-sm-2 mt-3 d-flex align-items-stretch"><div class="card bg-secondary text-white shadow-xl rounded" style="box-shadow: 0 0 9px 0px black;width:100%"> <div class="card-body" style="padding-bottom: 2px !important;  background-color:#FF4081"><center><div class="cmatch-team1">'+team1+'</div>VS<div class="cmatch-team2">'+team2+'</div><br><div class="cmatch-date">'+date+'</div><center></div></div></div></div>'
+								k++;
+							}else{
+								
+								
+								
+								//oldHTML+='<div class="col-sm-2 mt-3 d-flex align-items-stretch"><div class="card bg-secondary text-white shadow-xl rounded" style="box-shadow: 0 0 9px 0px black;width:100%"><div class="card-body bg-gray" style="padding-bottom: 0px !important"><center><div class="cmatch-team1">'+team1+'</div>VS<div class="cmatch-team2">'+team2+'</div><div class="cmatch-winner_team">'+winner+'</div><br><center></div></div></div>';	
+								oldHTML+='<div class="col-sm-2 mt-3 d-flex align-items-stretch" ><div class="card bg-secondary text-white shadow-xl rounded" style="box-shadow: 0 0 9px 0px black;width:100%"><div class="card-body" style="padding-bottom: 0px !important; background-color:#FF4081"><center><div class="cmatch-team1">'+team1+'</div>VS<div class="cmatch-team2">'+team2+'</div><div class="cmatch-winner_team">'+winner+'</div><br><center></div></div></div>';	
+								
+							}
+							
+							
+						}
+						
+						$("#up_matches").html(upHTML);
+						$("#old_matches").html(oldHTML);
+					}
+						
+					 else {
+						
+							}},
+				error : function(data) {
+					}
+			});
+
+}
+function getRecommendations() {
+	
+	var recomHTML='';
+	$
+	.ajax({
+		type : "GET",
+		url : "./GetMyMatches",
+		success : function(response) {
+
+			if (response.hasOwnProperty("MATCHES")) {
+				
+
+				$.each(response["MATCHES"],function(index, matchID) {
+					
+					$.ajax({
+						type : "GET",
+						url : "https://cricapi.com/api/cricketScore?apikey=OdL7x4SvkUYZrsqVaWbck8fI75k1&unique_id="+matchID,
+						success : function(response) {
+
+							if (response.hasOwnProperty("team-1")) {
+								
+										var date="";
+										var team1=response['team-1'].toUpperCase();
+										var team2=response['team-2'].toUpperCase();
+										var matchType=(response['type']!=null)?response['type'].toUpperCase():"";
+										var winner=(response['stat']!=null)?("Status : <br>"+response['stat'].toUpperCase()):"";
+										
+										
+										$("#recom_matches").html($("#recom_matches").html()+'<div class="col-sm-2 mt-3 d-flex align-items-stretch"><div class="card bg-secondary text-white shadow-xl rounded" style="box-shadow: 0 0 9px 0px black;width:100%"><div class="card-body" style="padding-bottom: 0px !important; background-color:#FF4081"><center><div class="cmatch-team1">'+team1+'</div>VS<div class="cmatch-team2">'+team2+'</div><br><div class="cmatch-date">'+date+'</div><br><div class="cmatch-winner_team">'+winner+'</div><br><div>'+matchType+'</div><br><button class="btn btn-warning" onclick="deleteMatch('+matchID+')">Delete</button></center></div></div></div>');
+									
+					
+									
+									
+								}
+							
+							}
+					
+					
+					
+				});
+				});
+				
+				
+			}else{
+				$("#recom_matches").html("<font color=red> No records Found </font>");
+			}
+			},error:function(response){
+				$("#recom_matches").html("<font color=red> Try again </font>");
+				
+			}
+		
+	});
+	
+
+
+}
+
+function deleteMatch(id) {
+	
+	
+	$
+	.ajax({
+		type : "DELETE",
+		url : "./deleteMatch/"+id,
+		success : function(response) {
+
+			if (response.hasOwnProperty("Deleted")) {
+				location.reload();
+				
+			}else{
+				alert(response["Error"]);
+			}
+			},error:function(response){
+				alert("Try Again");
+			}
+	});
+	
+
+
+}
+
+
+
+</script>
+</html>

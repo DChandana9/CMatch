@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>C-Match</title>
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script
+	src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script
+	src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background-image: url("./img/cricket.jpg");
+  background-repeat: no-repeat;
+   background-size: cover;
+   background-position: center;
+  height: 100vh;
+}
+.login-form {
+	width: 340px;
+	margin: 50px auto;
+	font-size: 15px;
+}
+
+
+.dupform {
+	margin-bottom: 15px;
+	background: #f7f7f7;
+	box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+	padding: 30px;
+}
+.login-form h2 {
+	margin: 0 0 15px;
+}
+
+.form-control, .btn {
+	min-height: 38px;
+	border-radius: 2px;
+}
+
+.btn {
+	font-size: 15px;
+	font-weight: bold;
+}
+.login-form
+        {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            width: 400px;
+            height: 500px;
+            padding: 80px 40px;
+            box-sizing: border-box;
+            background: rgba(0,0,0,.5);
+        }
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-primary navbar-expand-sm fixed-top">
+		<a class="navbar-brand" href="./"> <img src="./img/cricketpic.png"
+			width="50" height="50" alt="logo"><b> C-Match</b>
+		</a>
+	
+	</nav>
+
+
+
+	<div class="login-form">
+		<div class="dupform" >
+			<h2 class="text-center">MyProfile</h2>
+			<div class="form-group">
+				<label for="username" class="text-info">User Name :</label><br>
+				<input type="text" class="form-control" name="username"
+					id="name" placeholder="Username" required="required" readonly >
+			</div>
+			<div class="form-group">
+				<label for="email" class="text-info">User Email :</label><br> <input
+					type="email" class="form-control" name="email" id="email"
+					placeholder="Email" required="required" readonly>
+			</div>
+			<div class="form-group">
+				<label for="password" class="text-info">Old Password :</label><br>
+				<input type="password" class="form-control" name="oldpass"
+					id="oldpass" placeholder="Old Password" required="required">
+			</div>
+			<div class="form-group">
+				<label for="password" class="text-info">New Password :</label><br>
+				<input type="password" class="form-control" name="newpass"
+					id="newpass" placeholder="Re-Enter Password"
+					required="required">
+			</div>
+			
+			
+			<div id="error_msg"></div>
+			<div class="form-group">
+				<button type="submit" onclick="updateUser()"
+					class="btn btn-primary btn-block">Update</button>
+			</div>
+
+		
+	
+	</div>
+</body>
+<script>
+
+
+function checkUser() {
+	$
+			.ajax({
+				type : "GET",
+				url : "./getUser",
+				success : function(response) {
+
+					if (!response.hasOwnProperty("Email")) {
+
+						window.location.href="../login";					
+					} else {
+						$("#checked_login")
+						.html("<ul class='navbar-nav' style='margin-left: auto;'><li class='nav-item'><a class='nav-link btn btn-info' href=\"./MyMusic\"><font color=white><b>My Music Board</b></font></a></li> &nbsp;&nbsp;&nbsp;<li class='nav-item'><a class='nav-link ' href='./logout'><font color=white><b>LogOut</b></font></a></li>&nbsp;&nbsp;&nbsp;<a class='navbar-item' href='./profile'><li><span id='user_name'> <font color=red><b>"+response["UserName"]+"</b></font></span></li><li class='nav-item'><img  id='user_img' src='./img/"+response["img"]+"' alt='log' style='width: 100px;'></a></li></ul>");
+					$("#email").val(response["Email"]);
+						$("#name").val(response["UserName"]);
+					}
+				},
+				error : function(data) {
+					window.location.href="../login";	
+				}
+			});
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+function updateUser(){
+	var old=$("#oldpass").val();
+	if(old.trim()==""){
+		$("#error_msg").html("<font color=red> Please enter old password</font>");
+		return;
+	}
+	var newp=$("#newpass").val();
+	
+	if(newp.trim().length<6){
+		$("#error_msg").html("<font color=red> Password must contain atleast 6 characters");
+		return;
+	}
+	$.ajax({
+        type:"POST",
+        url:"../updateUser",
+        data:{"oldPassword":old,"newPassword":newp},
+        success:function(response){
+            if(!response.hasOwnProperty("Error")){
+            	$("#error_msg").html("<font color=green>"+response["Updated"]+"</font>");
+            	
+			
+		} else {									
+			$("#error_msg").html("<font color=red>"+response["Error"]+"</font>");
+		}
+       },
+        error:function(data){
+            $("#error_msg").html("<font color=red>Try after some  time</font>");
+       }
+   });
+	
+}
+checkUser();
+	
+
+
+</script>
+
+
+
+</html>

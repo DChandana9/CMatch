@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc">
+<head>
+<title>C-Match</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<style>
+/* Make the image fully responsive */
+.carousel-inner img {
+	width: 100%;
+	height: 100%;
+}
+
+.navbar-nav.navbar-center {
+	position: absolute;
+	left: 50%;
+	transform: translatex(-50%);
+}
+.cmatch-team1 {
+    font-weight: bold;
+}
+.cmatch-team2 {
+    font-weight: bold;
+
+}
+.navbar 
+{
+border-bottom: solid 3px white;
+}
+#nav-color
+        {
+        	background-color:#000000;
+        }
+
+</style>
+</head>
+<body onload="checkUser();getLiveMatches();">
+
+
+	<nav class="navbar navbar-dark navbar-expand-sm fixed-top" id="nav-color">
+		<a class="navbar-brand" href="./"> <img src="./img/cricketpic.png"
+			width="70" height="70" alt="logo"><font color=white size=7> C-Match</font>
+		</a>
+		<form class="form-inline mt-2 mt-md-0" method="get" action="./search">
+			<input class="form-control mr-md-2" type="text"
+				placeholder="Name or Type" id="search" name="search"
+				aria-label="Search" required>
+			<button id="search-btn" class="btn btn-warning my-2 my-sm-0"
+				type="submit">Search</button>
+		</form>
+		<button class="navbar-toggler" type="button" data-toggle="collapse"
+			data-target="#navbar-list-4" aria-controls="navbarNav"
+			aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbar-list-4">
+			<ul class="navbar-nav ml-auto">
+				<li class="nav-item dropdown"><a
+					class="nav-link dropdown-toggle" href="#"
+					id="navbarDropdownMenuLink" role="button" data-toggle="dropdown"
+					aria-haspopup="true" aria-expanded="false"> <img id="icon"
+						src="./img/Ball.png" width="50" height="50" class="rounded-circle">
+				</a>
+					<div class="dropdown-menu" id="profile_options"
+						aria-labelledby="navbarDropdownMenuLink"></div></li>
+			</ul>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		</div>
+	</nav>
+
+
+	<br>
+
+
+
+	<div id="demo" class="carousel slide" data-ride="carousel" >
+
+		<!-- Indicators -->
+		<ul class="carousel-indicators">
+			<li data-target="#demo" data-slide-to="0" class="active"></li>
+			<li data-target="#demo" data-slide-to="1"></li>
+			<li data-target="#demo" data-slide-to="2"></li>
+			<li data-target="#demo" data-slide-to="3"></li>
+		</ul>
+
+		<!-- The slideshow -->
+		<div class="carousel-inner">
+			<div class="carousel-item active">
+				<img src="./img/stadium.jpg" alt="Cricket" width="1100"
+					style="max-height: 450px">
+			</div>
+			<div class="carousel-item">
+				<img src="./img/a5.jpg" alt="Cricket" width="1100"
+					style="max-height: 450px">
+
+			</div>
+			<div class="carousel-item">
+				<img src="./img/a9.jpg" alt="Cricket" width="1100"
+					style="max-height: 450px">
+			</div>
+			<div class="carousel-item">
+				<img src="./img/a4.jpg" alt="Cricket" width="1100"
+					style="max-height: 450px">
+			</div>
+			
+		</div>
+
+		<!-- Left and right controls -->
+		<a class="carousel-control-prev" href="#demo" data-slide="prev"> <span
+			class="carousel-control-prev-icon"></span>
+		</a> <a class="carousel-control-next" href="#demo" data-slide="next">
+			<span class="carousel-control-next-icon"></span>
+		</a>
+	</div>
+	<center>
+		<h2>
+			<font color=Black size=7><b>Live Matches...!</b></font>
+		</h2>
+	</center>
+	<div class="container-fluid">
+		<div class="row" style="margin-top: 0px;" id="live_matches">
+
+		</div>
+	</div>
+
+</body>
+
+
+
+
+
+
+
+<script>
+function checkUser() {
+	$
+			.ajax({
+				type : "GET",
+				url : "./getUser",
+				success : function(response) {
+
+					if (response.hasOwnProperty("Email")) {
+
+						$("#profile_options")
+								.html('<a class="dropdown-item" href="./MyMatches">My Matches</a><a class="dropdown-item" href="./MyProfile">Edit Profile</a><a class="dropdown-item" href="./logout">Sign Out</a>');					
+						$("#icon").attr("src","./img/"+response["img"]);
+					} else {
+						$("#profile_options")
+						.html(' <a class="dropdown-item" href="./SignUp">SignUp</a><a class="dropdown-item" href="./login">Login</a>');
+				}},
+				error : function(data) {
+					$("#profile_options")
+					.html(' <a class="dropdown-item" href="./SignUp">SignUp</a><a class="dropdown-item" href="./login">Login</a>');
+	
+				}
+			});
+
+}
+
+function getLiveMatches() {
+	$
+			.ajax({
+				type : "GET",
+				url : "https://cricapi.com/api/matches?apikey=OdL7x4SvkUYZrsqVaWbck8fI75k1",
+				success : function(response) {
+
+					if (response.hasOwnProperty("matches")) {
+						var matches=response["matches"];
+						var k=0;
+						var liveHTML="";
+						for(i=0;i<matches.length;i++){
+							if(matches[i].matchStarted && matches[i].winner_team==null){
+								var team1=matches[i]['team-1'];
+								var team2=matches[i]['team-2'];
+								var matchType=matches[i]['type'];
+								
+								
+								
+								liveHTML+='<div class="col-sm-2 mt-3 d-flex align-items-stretch"><div class="card bg-secondary text-white shadow-xl rounded" style="box-shadow: 0 0 9px 0px black;width:100%"><div class="card-body" style="padding-bottom: 0px !important;background-color:#FF4081"><center><div class="cmatch-team1">'+team1+'</div>VS<div class="cmatch-team2">'+team2+'</div><div>'+matchType+'</div><center></div></div></div>';
+								
+								k++;
+								
+								
+								
+							}
+							
+						}
+						if(k==0){
+							$("#live_matches").html("<center> <font color=blue><b>NO LIVE MATCHES</b></font> </center>");
+						}else{
+							$("#live_matches").html(liveHTML);
+						}
+					}
+						
+					 else {
+						
+							}},
+				error : function(data) {
+					}
+			});
+
+}
+
+
+
+</script>
+</html>
